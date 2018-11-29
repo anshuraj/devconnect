@@ -192,4 +192,66 @@ router.post('/education',
       .catch(err => res.status(400).json(err));
 });
 
+// @route   DELETE api/profile/education/:edu_id
+// @desc    DELETE education from profile
+// @access  Private
+router.delete('/education/:edu_id',
+  passport.authenticate('jwt', {session: false}),
+  (req, res) => {
+    Profile.findOne({user: req.user.id})
+      .then(profile => {
+        // Get remove index
+        const removeIndex = profile.education
+          .map(item => item.id)
+          .indexOf(req.params.edu_id);
+
+          // Splice out of array
+        profile.education.splice(removeIndex, 1);
+        console.log(removeIndex, profile)
+
+        // Save
+        profile.save().then(profile => res.json(profile));
+      })
+      .catch(err => res.status(400).json({error: 'Something unexpected happened'}));
+});
+
+// @route   DELETE api/profile/experience/:edu_id
+// @desc    DELETE experience from profile
+// @access  Private
+router.delete('/experience/:exp_id',
+  passport.authenticate('jwt', {session: false}),
+  (req, res) => {
+    Profile.findOne({user: req.user.id})
+      .then(profile => {
+        // Get remove index
+        const removeIndex = profile.experience
+          .map(item => item.id)
+          .indexOf(req.params.exp_id);
+
+          // Splice out of array
+        profile.experience.splice(removeIndex, 1);
+        console.log(profile, removeIndex)
+        res.json(profile);
+
+        // Save
+        profile.save().then(profile => res.json(profile));
+      })
+      .catch(err => res.status(400).json({error: 'Something unexpected happened'}));
+});
+
+// @route   DELETE api/profile/experience/:edu_id
+// @desc    DELETE experience from profile
+// @access  Private
+router.delete('/',
+  passport.authenticate('jwt', {session: false}),
+  (req, res) => {
+    Profile.findOneAndRemove({user: req.user.id})
+      .then(() => {
+        User.findOneAndRemove({_id: req.user.id}).then(() => {
+          res.json({success: true, message: 'User and Profile removed'});
+        })
+      })
+      .catch(err => res.status(400).json({error: 'Something unexpected happened'}));
+});
+
 module.exports = router;
